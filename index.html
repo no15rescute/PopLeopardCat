@@ -50,7 +50,7 @@
             var no15_pop = document.querySelector("#no15_pop");
             var pop_count = 0;
             var counter = document.querySelector("#counter");
-
+            var sound_effect = new Audio('./A.mp3');
             var storage = {};
             storage.load = function () {
                 var count = localStorage.getItem("pop_count");
@@ -67,11 +67,17 @@
                 try{ document.createEvent("TouchEvent"); return true; }
                 catch(e){ return false;}
             }
+            
+            function playSound(){
+                sound_effect.currentTime = 0;
+                sound_effect.play();
+            }
 
             function count_up() {
                 pop_count++;
                 counter.innerHTML = pop_count;
                 storage.save();
+                playSound();
             }
 
             storage.load();
