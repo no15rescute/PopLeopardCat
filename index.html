@@ -77,7 +77,6 @@
                 pop_count++;
                 counter.innerHTML = pop_count;
                 storage.save();
-                playSound();
             }
 
             storage.load();
@@ -107,6 +106,7 @@
                 //  點擊事件
                 no15_container.addEventListener('mousedown', function (e) {
                     count_up();
+                    playSound();
                     no15.setAttribute("style","visibility: hidden;");
                     no15_pop.setAttribute("style","visibility: unset;");
                 });
@@ -117,6 +117,7 @@
 
                 //  鍵盤事件
                 document.addEventListener('keydown', function (e) {
+                    playSound();
                     no15.setAttribute("style","visibility: hidden;");
                     no15_pop.setAttribute("style","visibility: unset;");
                 });
