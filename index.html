@@ -53,6 +53,7 @@
             var sound_effect = new Audio('./A.mp3');
 
             function pop() {
+                playSound();
                 no15.setAttribute("style","visibility: hidden;");
                 no15_pop.setAttribute("style","visibility: unset;");
             }
@@ -115,7 +116,6 @@
                 //  點擊事件
                 no15_container.addEventListener('mousedown', function (e) {
                     count_up();
-                    playSound();
                     pop();
                 });
                 no15_container.addEventListener('mouseup', function (e) {
@@ -124,7 +124,6 @@
 
                 //  鍵盤事件
                 document.addEventListener('keydown', function (e) {
-                    playSound();
                     pop();
                 });
                 document.addEventListener('keyup', function (e) {
