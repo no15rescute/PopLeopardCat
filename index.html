@@ -50,11 +50,31 @@
             var no15_pop = document.querySelector("#no15_pop");
             var pop_count = 0;
             var counter = document.querySelector("#counter");
+
+            var storage = {};
+            storage.load = function () {
+                var count = localStorage.getItem("pop_count");
+                if (count !== null) {
+                    pop_count = parseInt(count);
+                    counter.innerHTML = pop_count;
+                }
+            };
+            storage.save = function () {
+                localStorage.setItem("pop_count", pop_count);
+            }
             
             function isMobile() {
                 try{ document.createEvent("TouchEvent"); return true; }
                 catch(e){ return false;}
             }
+
+            function count_up() {
+                pop_count++;
+                counter.innerHTML = pop_count;
+                storage.save();
+            }
+
+            storage.load();
 
             if (isMobile()) {
                 window.addEventListener("touchmove",function(e) {
@@ -62,8 +82,7 @@
                 }, { passive: false });
                 no15.setAttribute("src","./up.png");
                 no15_container.addEventListener('touchstart', function (e) {
-                    pop_count++;
-                    counter.innerHTML = pop_count;
+                    count_up();
                     no15.setAttribute("style","visibility: hidden;");
                     no15_pop.setAttribute("style","visibility: unset;");
                 });
@@ -81,8 +100,7 @@
 
                 //  點擊事件
                 no15_container.addEventListener('mousedown', function (e) {
-                    pop_count++;
-                    counter.innerHTML = pop_count;
+                    count_up();
                     no15.setAttribute("style","visibility: hidden;");
                     no15_pop.setAttribute("style","visibility: unset;");
                 });
@@ -97,8 +115,7 @@
                     no15_pop.setAttribute("style","visibility: unset;");
                 });
                 document.addEventListener('keyup', function (e) {
-                    pop_count++;
-                    counter.innerHTML = pop_count;
+                    count_up();
                     no15_pop.setAttribute("style","visibility: hidden;");
                     no15.setAttribute("src","./up.png");
                     no15.setAttribute("style","visibility: unset;");
