@@ -57,13 +57,9 @@
             }
 
             if (isMobile()) {
-                window.addEventListener("touchmove",function(e) {
-                    if(e.scale !== 1) {
-                        e.preventDefault();
-                    }
-                }, {
-                    passive: false
-                });
+                body.addEventListener("touchmove",function(e) {
+                    e.preventDefault();
+                }, { passive: false });
                 no15.setAttribute("src","./up.png");
                 no15_container.addEventListener('touchstart', function (e) {
                     pop_count++;
