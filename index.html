@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, maximum-scale=1, minimum-scale=1">
         <style>
             body {
+                -webkit-user-select: none;
                 overflow: hidden;
                 margin: 0px;
                 height: 100vh;
@@ -56,6 +57,13 @@
             }
 
             if (isMobile()) {
+                window.addEventListener("touchmove",function(e) {
+                    if(e.scale !== 1) {
+                        e.preventDefault();
+                    }
+                }, {
+                    passive: false
+                });
                 no15.setAttribute("src","./up.png");
                 no15_container.addEventListener('touchstart', function (e) {
                     pop_count++;
