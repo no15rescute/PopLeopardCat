@@ -31,24 +31,42 @@
     </body>
     <script>
         window.onload = () => {
-            console.warn('我在幹嘛我怎麼還不去工作????')
+            console.warn('我在幹嘛我怎麼還不去工作????');
             var no15_container = document.querySelector("#no15_container");
             var no15 = document.querySelector("#no15");
             var no15_pop = document.querySelector("#no15_pop");
-            no15_container.addEventListener('mouseover', function (e) {
+            
+            function isMobile() {
+                try{ document.createEvent("TouchEvent"); return true; }
+                catch(e){ return false;}
+            }
+
+            if (isMobile()) {
                 no15.setAttribute("src","./up.png");
-            });
-            no15_container.addEventListener('mouseout', function (e) {
-                no15.setAttribute("src","./normal.png");
-            });
-            no15_container.addEventListener('mousedown', function (e) {
-                no15.setAttribute("style","visibility: hidden;");
-                no15_pop.setAttribute("style","visibility: unset;");
-            });
-            no15_container.addEventListener('mouseup', function (e) {
-                no15_pop.setAttribute("style","visibility: hidden;");
-                no15.setAttribute("style","visibility: unset;");
-            });
+                no15_container.addEventListener('touchstart', function (e) {
+                    no15.setAttribute("style","visibility: hidden;");
+                    no15_pop.setAttribute("style","visibility: unset;");
+                });
+                no15_container.addEventListener('touchend', function (e) {
+                    no15_pop.setAttribute("style","visibility: hidden;");
+                    no15.setAttribute("style","visibility: unset;");
+                });
+            } else {
+                no15_container.addEventListener('mouseover', function (e) {
+                    no15.setAttribute("src","./up.png");
+                });
+                no15_container.addEventListener('mouseout', function (e) {
+                    no15.setAttribute("src","./normal.png");
+                });
+                no15_container.addEventListener('mousedown', function (e) {
+                    no15.setAttribute("style","visibility: hidden;");
+                    no15_pop.setAttribute("style","visibility: unset;");
+                });
+                no15_container.addEventListener('mouseup', function (e) {
+                    no15_pop.setAttribute("style","visibility: hidden;");
+                    no15.setAttribute("style","visibility: unset;");
+                });
+            }
         }
     </script>
 </html>
