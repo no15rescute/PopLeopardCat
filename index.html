@@ -57,7 +57,7 @@
             }
 
             if (isMobile()) {
-                body.addEventListener("touchmove",function(e) {
+                window.addEventListener("touchmove",function(e) {
                     e.preventDefault();
                 }, { passive: false });
                 no15.setAttribute("src","./up.png");
@@ -93,12 +93,12 @@
 
                 //  鍵盤事件
                 document.addEventListener('keydown', function (e) {
-                    pop_count++;
-                    counter.innerHTML = pop_count;
                     no15.setAttribute("style","visibility: hidden;");
                     no15_pop.setAttribute("style","visibility: unset;");
                 });
                 document.addEventListener('keyup', function (e) {
+                    pop_count++;
+                    counter.innerHTML = pop_count;
                     no15_pop.setAttribute("style","visibility: hidden;");
                     no15.setAttribute("src","./up.png");
                     no15.setAttribute("style","visibility: unset;");
