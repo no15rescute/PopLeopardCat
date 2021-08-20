@@ -97,6 +97,105 @@
             storage.save = function () {
                 localStorage.setItem("pop_count", pop_count);
             }
+            storage.id = function () {
+                return localStorage.getItem("online_id");
+            };
+            storage.set_id = function (id) {
+                localStorage.setItem("online_id", id);
+            };
+
+            var online = (function () {
+                var self = {};
+                var ws = null;
+                var start = new Date();
+                var no = 0;
+                var waiting = true;
+                var score = 0;
+                var salt = "";
+                var hash = "";
+                var hashes_start = 0;
+                var hashes = [];
+                var tasks = [];
+                var gen_hashes = function (target_no, sec) {
+                    var idx = target_no - hashes_start;
+                    if (idx < 0) {
+                        return [];
+                    } else {
+                        return hashes[idx] = window.hash(hash, salt, score, sec, ws);
+                    }
+                };
+                self.connect = function (cb) {
+                    ws = new WebSocket("wss://scores.popleopardcat.saru.moe/submit");
+                    //ws = new WebSocket("ws://scores-popleopardcat.test-endpoint.lan:3000/submit");
+                    ws.onmessage = function (evt) {
+                        var args = evt.data.split(",");
+                        var cmd = args.shift();
+                        switch (cmd) {
+                            case "init":
+                                storage.set_id(args[0]);
+                                score = parseInt(args[1]);
+                                hash = args[2];
+                                salt = args[3];
+                                start = new Date();
+                                hashes_start = 0;
+                                hashes = [];
+                                tasks = [];
+                                waiting = false;
+                                if (cb) cb();
+                                break;
+                            case "ack":
+                                var sync_no = parseInt(args[0]);
+                                var idx = sync_no - hashes_start;
+                                score = parseInt(args[1]);
+                                hash = hashes[idx][parseInt(args[2])];
+                                if (args[3]) salt = args[3];
+                                hashes_start = sync_no + 1;
+                                hashes = hashes.slice(sync_no + 1);
+                                break;
+                            case "sync":
+                                hash = args[0];
+                                hashes = [];
+                                hashes_start = no + 1;
+                                for (var k in tasks) clearTimeout(tasks[k]);
+                                tasks = [];
+                                score = parseInt(args[1]);
+                                if (args[2]) salt = args[2];
+                                break;
+                        }
+                    };
+                    ws.onopen = function() {
+                        connected = true;
+                        var id = storage.id();
+                        if (id) ws.send("contiune," + id);
+                        else ws.send("new");
+                    };
+                    ws.onclose = function() {
+                        ws = null;
+                        waiting = true;
+                    }
+                };
+                self.count_up = function () {
+                    if (!window.hash) return;
+                    if (!ws) self.connect(self.count_up);
+                    else if (!waiting) {
+                        no += 1;
+                        var local_no = no;
+                        var ms = new Date() - start;
+                        var sec = Math.floor(ms / 1000);
+                        var ms2wait = no * 3 - ms;
+                        if (ms2wait < 0) ms2wait = 0;
+                        tasks.push(setTimeout(function() {
+                            if (ws) {
+                                hs = gen_hashes(local_no, sec);
+                                ws.send("count," + local_no + "," + hs.join(","));
+                                hash = hs[2];
+                                score += 1;
+                            }
+                        }, ms2wait));
+                    }
+                };
+                return self;
+            })();
 
             function isMobile() {
                 try{ document.createEvent("TouchEvent"); return true; }
@@ -112,6 +211,7 @@
                 pop_count++;
                 counter.innerHTML = pop_count;
                 storage.save();
+                online.count_up();
             }
 
             storage.load();
@@ -157,6 +257,7 @@
             }
         }
     </script>
+    <script src="hash.js" async></script>
     <script type="module">
         import 'https://cdn.jsdelivr.net/npm/@pwabuilder/pwaupdate';
     
