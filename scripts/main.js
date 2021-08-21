@@ -70,7 +70,7 @@
                     no15.setAttribute("src","./images/characters/no15/up.png");
                 });
                 no15_container.addEventListener('mouseout', function (e) {
-                    no15.setAttribute("src","../images/characters/no15/normal.png");
+                    no15.setAttribute("src","./images/characters/no15/normal.png");
                 });
 
                 //  點擊事件
