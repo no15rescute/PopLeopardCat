@@ -1,0 +1,25 @@
+{
+  "name": "popleopardcat",
+  "version": "1.0.0",
+  "description": "[![Watch the video](https://img.youtube.com/vi/8w-_W-S_wGQ/0.jpg)](https://youtu.be/8w-_W-S_wGQ)",
+  "main": "pwabuilder-sw.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "autoprefixer": "^10.3.1",
+    "gulp": "^4.0.2",
+    "gulp-babel": "^8.0.0",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-postcss": "^9.0.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-sass": "^5.0.0",
+    "gulp-uglify": "^3.0.2",
+    "postcss": "^8.3.6",
+    "sass": "^1.38.0"
+  }
+}
