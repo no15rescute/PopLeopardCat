@@ -6,7 +6,8 @@ const rename = require('gulp-rename');
 const cleanCSS = require('gulp-clean-css');
 const postcss = require('gulp-postcss');
 const autoprefixer = require('autoprefixer');
-
+const inline = require('gulp-inline')
+const htmlmin = require('gulp-htmlmin')
 
 function compileJavascript() {
     return src(['scripts/*.js','!scripts/*.min.js'])
@@ -27,4 +28,13 @@ function compileCSS() {
         .pipe(dest('css'));
 }
 
-exports.default = parallel(compileCSS, compileJavascript);
+function compileHtml() {
+    return src('htmls/*.html')
+        .pipe(inline({
+            base:'./'
+        }))
+        .pipe(htmlmin({ collapseWhitespace: true }))
+        .pipe(dest('./'));
+}
+
+exports.default =  series(parallel(compileCSS, compileJavascript), compileHtml);

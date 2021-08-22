@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pop Leopard Cat</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, maximum-scale=1, minimum-scale=1">
+        <!-- Primary Meta Tags -->
+        <meta name="title" content="Pop Leopard Cat">
+        <meta name="description" content="Click No.15">
+        <!-- Manifest -->
+        <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16x16.png">
+        <link rel="manifest" href="./site.webmanifest">
+        <link rel="mask-icon" href="./icons/safari-pinned-tab.svg" color="#ffeaab">
+        <meta name="msapplication-TileColor" content="#ffeaab">
+        <meta name="theme-color" content="#ffeaab">
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://no15rescute.github.io/PopLeopardCat/">
+        <meta property="og:title" content="Pop Leopard Cat">
+        <meta property="og:description" content="Click No.15">
+        <meta property="og:image" content="https://no15rescute.github.io/PopLeopardCat/icons/icon.jpg">
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="https://no15rescute.github.io/PopLeopardCat/">
+        <meta property="twitter:title" content="Pop Leopard Cat">
+        <meta property="twitter:description" content="Click No.15">
+        <meta property="twitter:image" content="https://no15rescute.github.io/PopLeopardCat/icons/icon.jpg">
+        <link rel="stylesheet" href="../css/main.css">
+    </head>
+    <body>
+        <div id="no15_container" style="min-width: fit-content; min-height: fit-content;">
+            <img id="no15" src="./images/characters/no15/normal.png"/>
+            <img id="no15_pop" src="./images/characters/no15/pop.png" style="visibility: hidden;"/>
+            <div id="counter"></div>
+        </div>
+    </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"
+    integrity="sha512-6+YN/9o9BWrk6wSfGxQGpt3EUK6XeHi6yeHV+TYD2GR0Sj/cggRpXr1BrAQf0as6XslxomMUxXp2vIl+fv0QRA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>    
+    <script src="../scripts/main.min.js">
+    </script>
+    <script type="module">
+        import 'https://cdn.jsdelivr.net/npm/@pwabuilder/pwaupdate';
+    
+        const el = document.createElement('pwa-update');
+        document.body.appendChild(el);
+    </script>
+</html>
