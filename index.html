@@ -39,7 +39,7 @@
                 background-size: cover;
             }
             #no15_container,
-            #scores_container {
+            #scores_container_wrap {
                 width: 100vw;
                 height: 100vh;
                 display: flex;
@@ -59,20 +59,116 @@
                 color: transparent;
                 text-shadow: 0px 0px 15px #da5b11c0
             }
-            #scores {
-                background-color: #fff0c3;
+            #scores_container {
                 position: absolute;
                 bottom: 0;
+                z-index: 200;
+                background-color: #fff0c3;
                 margin: 0 auto;
                 width: 100%;
                 max-width: 50rem;
-                border: .1rem #fee9ad solid;
+                border: 0.1rem #fee9ad solid;
                 border-radius: 1rem 1rem 0 0;
                 padding: 0.75rem;
+            }
+            #scores_icon {
+                border-right: 0.1rem #fee9ad solid;
+                padding: 0 0.75rem 0 0.25rem;
+            }
+            #scores {
+                display: flex;
+                flex-direction: row;
+
+                vertical-align: middle;
+            }
+            #scores_center {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+                position: relative;
             }
             #global_scores {
                 text-align: center;
                 color: #a22105;
+            }
+            #global_scores_text {
+                display: contents;
+            }
+            #scores_signin_wrap {
+                position: absolute;
+                right: 0.5rem;
+            }
+            #scores_signin_wrap:hover {
+                background: rgba(0, 0, 0, 0.2);
+                border-radius: 0.25rem;
+            }
+            #scores_signin_icon {
+                background: url(youtube_social_icon_red.png);
+                background-repeat: no-repeat;
+                background-size: contain;
+                width: 1.5rem;
+                height: 1rem;
+                display: inline-block;
+                vertical-align: middle;
+            }
+            #scores_signin {
+                background: transparent;
+                border: none;
+                padding-right: 0.5rem;
+            }
+            #scores_toggle_wrap {
+                display: flex;
+                flex-direction: column;
+                border-left: 0.1rem #fee9ad solid;
+            }
+            #scores_toggle {
+                background: transparent;
+                border: none;
+                padding: 0 0.25rem 0 0.75rem;
+            }
+            #scores_toggle svg {
+                transition: transform 0.5s ease-in-out;
+                width: 1rem;
+            }
+            #scores_toggle.show svg {
+                transform: rotate(-180deg);
+            }
+            #scores_leaderboard {
+                display: flex;
+                flex-direction: row;
+                max-height: 0;
+                transition: max-height 0.5s;
+            }
+            #scores_leaderboard.show {
+                max-height: 70vh;
+            }
+            #scores_leaderboard div.wrap {
+                overflow-y: scroll;
+                margin-top: 1rem;
+                width: 100%;
+            }
+            #scores_leaderboard ol {
+                padding: 0 0.5rem;
+                list-style: none;
+                max-width: 50rem;
+                margin: 0 auto;
+            }
+            #scores_leaderboard li {
+                padding: 0.5rem 0;
+                display: flex;
+                flex-direction: row;
+                border-bottom: 0.1rem #fee9ad solid ;
+                align-items: center;
+            }
+            #scores_leaderboard li .no {
+                min-width: 1.5rem;
+                text-align: center;
+                margin-right: 0.5rem;
+            }
+            #scores_leaderboard li .name {
+            }
+            #scores_leaderboard li .score {
+                margin-left: auto;
             }
         </style>
     </head>
@@ -82,10 +178,31 @@
             <img id="no15_pop" src="./pop.png" style="visibility: hidden;"/>
             <div id="counter"></div>
         </div>
-        <div id="scores_container">
-            <div id="scores">
-                <div id="global_scores">
-                    總點擊 <span id="global_scores_text">???,???</span>
+        <div id="scores_container_wrap">
+            <div id="scores_container">
+                <div id="scores">
+                    <div id="scores_icon">🏆</div>
+                    <div id="scores_center">
+                        <div id="global_scores">
+                            總點擊 <span id="global_scores_text">???,???</span>
+                        </div>
+                        <div id="scores_signin_wrap">
+                            <button id="scores_signin">
+                                <div id="scores_signin_icon"></div>
+                                登入
+                            </button>
+                        </div>
+                    </div>
+                    <div id="scores_toggle_wrap">
+                        <button id="scores_toggle">
+                            <svg data-v-0a2cb64d="" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16"><path data-v-0a2cb64d="" fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="scores_leaderboard">
+                    <div class="wrap">
+                        <ol></ol>
+                    </div>
                 </div>
             </div>
         </div>
@@ -130,8 +247,8 @@
             };
 
             var online = (function () {
-                var server = "wss://scores.popleopardcat.saru.moe";
-                //var server = "ws://scores-popleopardcat.test-endpoint.lan:3000";
+                //var server = "wss://scores.popleopardcat.saru.moe";
+                var server = "ws://scores-popleopardcat.test-endpoint.lan:3000";
                 var self = {
                     score: 0 // real online score
                 };
@@ -150,6 +267,7 @@
                 var task_last = start;
 
                 var global_score = document.querySelector("#global_scores_text");
+                var leaderboard = document.querySelector("#scores_leaderboard ol");
 
                 var gen_hashes = function (target_no, sec) {
                     var idx = target_no - hashes_start;
@@ -247,24 +365,60 @@
                     }
                 };
 
+                self.format_score = function (score) {
+                    return score.toLocaleString('en-US', { useGrouping: true });
+                };
                 self.update_global_score = function(score) {
-                    global_score.innerHTML = score.toLocaleString('en-US', { useGrouping: true });
+                    global_score.innerHTML = self.format_score(score);
                 };
                 self.step_global_score = function() {
                     self.update_global_score(parseInt(global_score.innerHTML.replace(",", "")) + 1);
                 };
-                self.global_score = function (retry) {
-                    var gws = new WebSocket(server + "/global");
-                    var score = document.querySelector("#global_scores_text");
-                    gws.onmessage = function (evt) {
+                self.update_leaderboard = function(top) {
+                    leaderboard.innerHTML = "";
+                    top.forEach(function (ele, idx) {
+                        var no = document.createElement("span");
+                        no.classList.add("no");
+                        switch (idx + 1) {
+                            case 1:
+                                no.innerHTML = "🥇";
+                                break;
+                            case 2:
+                                no.innerHTML = "🥈";
+                                break;
+                            case 3:
+                                no.innerHTML = "🥉";
+                                break;
+                            default:
+                                no.innerHTML = idx + 1;
+                                break;
+                        }
+                        var name = document.createElement("span");
+                        name.classList.add("name");
+                        if (ele.name) {
+                        } else {
+                            name.innerHTML = "這是個低調的路人";
+                        }
+                        var score = document.createElement("span");
+                        score.classList.add("score");
+                        score.innerHTML = self.format_score(ele.score);
+                        var li = document.createElement("li");
+                        li.append(no, name, score);
+                        leaderboard.append(li);
+                    });
+                };
+                self.leaderboard = function (retry) {
+                    var lws = new WebSocket(server + "/top/100");
+                    lws.onmessage = function (evt) {
                         var json = JSON.parse(evt.data);
-                        self.update_global_score(json.score);
+                        self.update_global_score(json.global.score);
+                        self.update_leaderboard(json.top);
                     };
-                    gws.onclose = function () {
+                    lws.onclose = function () {
                         retry = (retry || -1) + 1;
                         if (retry > 8) retry = 8;
                         setTimeout(function () {
-                            self.global_score(retry);
+                            self.leaderboard(retry);
                         }, Math.pow(2, retry));
                     }
                 };
@@ -289,7 +443,19 @@
             }
 
             storage.load();
-            online.global_score();
+            online.leaderboard();
+
+            var scores_toggle = document.querySelector("#scores_toggle");
+            var scores_leaderboard = document.querySelector("#scores_leaderboard");
+            scores_toggle.addEventListener('click', function(e) {
+                if (scores_toggle.classList.contains("show")) {
+                    scores_toggle.classList.remove("show");
+                    scores_leaderboard.classList.remove("show");
+                } else {
+                    scores_toggle.classList.add("show");
+                    scores_leaderboard.classList.add("show");
+                }
+            });
 
             if (isMobile()) {
                 window.addEventListener("touchmove",function(e) {
