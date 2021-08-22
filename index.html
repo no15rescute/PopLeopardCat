@@ -110,7 +110,8 @@
                     score: 0 // real online score
                 };
                 var ws = null;
-                var start = new Date();
+                var start = Date.now();
+                var next = start;
                 var no = 0;
                 var waiting = true;
                 var score = 0;
@@ -119,6 +120,8 @@
                 var hashes_start = 0;
                 var hashes = [];
                 var tasks = [];
+                var task_runner = null;
+                var task_last = start;
                 var gen_hashes = function (target_no, sec) {
                     var idx = target_no - hashes_start;
                     if (idx < 0) {
@@ -139,10 +142,11 @@
                                 self.score = score = parseInt(args[1]);
                                 hash = args[2];
                                 salt = args[3];
-                                start = new Date();
+                                start = Date.now();
                                 hashes_start = 0;
                                 hashes = [];
                                 tasks = [];
+                                self.setup_task_runner();
                                 waiting = false;
                                 if (cb) cb();
                                 break;
@@ -160,10 +164,10 @@
                                 hash = args[0];
                                 hashes = [];
                                 hashes_start = no + 1;
-                                for (var k in tasks) clearTimeout(tasks[k]);
                                 tasks = [];
                                 self.score = score = parseInt(args[1]);
                                 if (args[2]) salt = args[2];
+                                self.count_up();
                                 break;
                         }
                     };
@@ -178,25 +182,38 @@
                         waiting = true;
                     }
                 };
+                self.setup_task_runner = function() {
+                    if (task_runner) return;
+                    task_runner = setInterval(function() {
+                        var now = Date.now();
+                        if (tasks.length === 0) {
+                            if (!ws) {
+                                clearInterval(task_runner);
+                                task_runner = null;
+                            }
+                        } else if ((now - task_last) >= 3) {
+                            task_last = now;
+                            var task = tasks.shift();
+                            task();
+                        }
+                    }, 3);
+                };
                 self.count_up = function () {
                     if (!window.hash) return;
                     if (!ws) self.connect(self.count_up);
                     else if (!waiting) {
                         no += 1;
                         var local_no = no;
-                        var ms = new Date() - start;
-                        var sec = Math.floor(ms / 1000);
-                        var ms2wait = no * 3 - ms;
-                        if (ms2wait < 0) ms2wait = 0;
-                        tasks.push(setTimeout(function() {
+                        tasks.push(function() {
                             if (ws) {
+                                var sec = Math.floor((Date.now() - start) / 1000);
                                 hs = gen_hashes(local_no, sec);
                                 ws.send("count," + local_no + "," + hs.join(","));
                                 hash = hs[2];
                                 score += 1;
                                 self.score += 1;
                             }
-                        }, ms2wait));
+                        });
                     }
                 };
                 return self;
