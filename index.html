@@ -38,16 +38,18 @@
                 background-repeat: no-repeat;
                 background-size: cover;
             }
-            img {
-                position: absolute;
-                height: 100vh;
-            }
-            div {
+            #no15_container,
+            #scores_container {
                 width: 100vw;
                 height: 100vh;
                 display: flex;
                 justify-content: center;
                 overflow: hidden;
+            }
+            #no15_container img {
+                position: absolute;
+                height: 100vh;
+                height: calc(100vh - 2.5rem);
             }
             #counter {
                 line-height: 2em;
@@ -57,6 +59,21 @@
                 color: transparent;
                 text-shadow: 0px 0px 15px #da5b11c0
             }
+            #scores {
+                background-color: #fff0c3;
+                position: absolute;
+                bottom: 0;
+                margin: 0 auto;
+                width: 100%;
+                max-width: 50rem;
+                border: .1rem #fee9ad solid;
+                border-radius: 1rem 1rem 0 0;
+                padding: 0.75rem;
+            }
+            #global_scores {
+                text-align: center;
+                color: #a22105;
+            }
         </style>
     </head>
     <body>
@@ -64,6 +81,13 @@
             <img id="no15" src="./normal.png"/>
             <img id="no15_pop" src="./pop.png" style="visibility: hidden;"/>
             <div id="counter"></div>
+        </div>
+        <div id="scores_container">
+            <div id="scores">
+                <div id="global_scores">
+                    總點擊 <span id="global_scores_text">???,???</span>
+                </div>
+            </div>
         </div>
     </body>
     <script>
@@ -106,6 +130,8 @@
             };
 
             var online = (function () {
+                var server = "wss://scores.popleopardcat.saru.moe";
+                //var server = "ws://scores-popleopardcat.test-endpoint.lan:3000";
                 var self = {
                     score: 0 // real online score
                 };
@@ -131,8 +157,7 @@
                     }
                 };
                 self.connect = function (cb) {
-                    ws = new WebSocket("wss://scores.popleopardcat.saru.moe/submit");
-                    //ws = new WebSocket("ws://scores-popleopardcat.test-endpoint.lan:3000/submit");
+                    ws = new WebSocket(server + "/submit");
                     ws.onmessage = function (evt) {
                         var args = evt.data.split(",");
                         var cmd = args.shift();
@@ -216,6 +241,15 @@
                         });
                     }
                 };
+
+                self.global_score = function () {
+                    var gws = new WebSocket(server + "/global");
+                    var score = document.querySelector("#global_scores_text");
+                    gws.onmessage = function (evt) {
+                        var json = JSON.parse(evt.data);
+                        score.innerHTML = json.score.toLocaleString('en-US', { useGrouping: true });
+                    };
+                };
                 return self;
             })();
 
@@ -237,6 +271,7 @@
             }
 
             storage.load();
+            online.global_score();
 
             if (isMobile()) {
                 window.addEventListener("touchmove",function(e) {
