@@ -106,7 +106,9 @@
             };
 
             var online = (function () {
-                var self = {};
+                var self = {
+                    score: 0 // real online score
+                };
                 var ws = null;
                 var start = new Date();
                 var no = 0;
@@ -134,7 +136,7 @@
                         switch (cmd) {
                             case "init":
                                 storage.set_id(args[0]);
-                                score = parseInt(args[1]);
+                                self.score = score = parseInt(args[1]);
                                 hash = args[2];
                                 salt = args[3];
                                 start = new Date();
@@ -147,9 +149,10 @@
                             case "ack":
                                 var sync_no = parseInt(args[0]);
                                 var idx = sync_no - hashes_start;
-                                score = parseInt(args[1]);
-                                hash = hashes[idx][parseInt(args[2])];
-                                if (args[3]) salt = args[3];
+                                hash = hashes[idx][parseInt(args[1])];
+                                score = parseInt(args[2]);
+                                self.score = parseInt(args[3]);
+                                if (args[4]) salt = args[4];
                                 hashes_start = sync_no + 1;
                                 hashes = hashes.slice(sync_no + 1);
                                 break;
@@ -159,7 +162,7 @@
                                 hashes_start = no + 1;
                                 for (var k in tasks) clearTimeout(tasks[k]);
                                 tasks = [];
-                                score = parseInt(args[1]);
+                                self.score = score = parseInt(args[1]);
                                 if (args[2]) salt = args[2];
                                 break;
                         }
@@ -191,6 +194,7 @@
                                 ws.send("count," + local_no + "," + hs.join(","));
                                 hash = hs[2];
                                 score += 1;
+                                self.score += 1;
                             }
                         }, ms2wait));
                     }
