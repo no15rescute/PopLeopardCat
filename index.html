@@ -148,6 +148,9 @@
                 var tasks = [];
                 var task_runner = null;
                 var task_last = start;
+
+                var global_score = document.querySelector("#global_scores_text");
+
                 var gen_hashes = function (target_no, sec) {
                     var idx = target_no - hashes_start;
                     if (idx < 0) {
@@ -237,18 +240,33 @@
                                 hash = hs[2];
                                 score += 1;
                                 self.score += 1;
+
+                                self.step_global_score();
                             }
                         });
                     }
                 };
 
-                self.global_score = function () {
+                self.update_global_score = function(score) {
+                    global_score.innerHTML = score.toLocaleString('en-US', { useGrouping: true });
+                };
+                self.step_global_score = function() {
+                    self.update_global_score(parseInt(global_score.innerHTML.replace(",", "")) + 1);
+                };
+                self.global_score = function (retry) {
                     var gws = new WebSocket(server + "/global");
                     var score = document.querySelector("#global_scores_text");
                     gws.onmessage = function (evt) {
                         var json = JSON.parse(evt.data);
-                        score.innerHTML = json.score.toLocaleString('en-US', { useGrouping: true });
+                        self.update_global_score(json.score);
                     };
+                    gws.onclose = function () {
+                        retry = (retry || -1) + 1;
+                        if (retry > 8) retry = 8;
+                        setTimeout(function () {
+                            self.global_score(retry);
+                        }, Math.pow(2, retry));
+                    }
                 };
                 return self;
             })();
