@@ -69,7 +69,6 @@
                 max-width: 50rem;
                 border: 0.1rem #fee9ad solid;
                 border-radius: 1rem 1rem 0 0;
-                padding: 0.75rem;
             }
             #scores_icon {
                 border-right: 0.1rem #fee9ad solid;
@@ -78,8 +77,8 @@
             #scores {
                 display: flex;
                 flex-direction: row;
-
                 vertical-align: middle;
+                padding: 0.75rem;
             }
             #scores_center {
                 display: flex;
@@ -115,6 +114,9 @@
                 background: transparent;
                 border: none;
                 padding-right: 0.5rem;
+            }
+            #scores_signedin {
+                display: none;
             }
             #scores_toggle_wrap {
                 display: flex;
@@ -167,6 +169,9 @@
             }
             #scores_leaderboard li .name {
             }
+            #scores_leaderboard li .name .yourself {
+                font-size: 0.75rem;
+            }
             #scores_leaderboard li .score {
                 margin-left: auto;
             }
@@ -191,6 +196,9 @@
                                 <div id="scores_signin_icon"></div>
                                 登入
                             </button>
+                            <div id="scores_signedin">
+                                已登入
+                            </div>
                         </div>
                     </div>
                     <div id="scores_toggle_wrap">
@@ -253,6 +261,7 @@
                     score: 0 // real online score
                 };
                 var ws = null;
+                var online_id = storage.id();
                 var start = Date.now();
                 var next = start;
                 var no = 0;
@@ -268,6 +277,7 @@
 
                 var global_score = document.querySelector("#global_scores_text");
                 var leaderboard = document.querySelector("#scores_leaderboard ol");
+                var leaderboard_yourself = null;
 
                 var gen_hashes = function (target_no, sec) {
                     var idx = target_no - hashes_start;
@@ -284,7 +294,8 @@
                         var cmd = args.shift();
                         switch (cmd) {
                             case "init":
-                                storage.set_id(args[0]);
+                                online_id = args[0]
+                                storage.set_id(online_id);
                                 self.score = score = parseInt(args[1]);
                                 hash = args[2];
                                 salt = args[3];
@@ -292,7 +303,7 @@
                                 hashes_start = 0;
                                 hashes = [];
                                 tasks = [];
-                                self.setup_task_runner();
+                                setup_task_runner();
                                 waiting = false;
                                 if (cb) cb();
                                 break;
@@ -319,8 +330,7 @@
                     };
                     ws.onopen = function() {
                         connected = true;
-                        var id = storage.id();
-                        if (id) ws.send("contiune," + id);
+                        if (online_id) ws.send("contiune," + online_id);
                         else ws.send("new");
                     };
                     ws.onclose = function() {
@@ -328,7 +338,7 @@
                         waiting = true;
                     }
                 };
-                self.setup_task_runner = function() {
+                function setup_task_runner() {
                     if (task_runner) return;
                     task_runner = setInterval(function() {
                         var now = Date.now();
@@ -359,23 +369,31 @@
                                 score += 1;
                                 self.score += 1;
 
-                                self.step_global_score();
+                                step_global_score();
+                                step_leaderboard_yourself();
                             }
                         });
                     }
                 };
 
-                self.format_score = function (score) {
+                function format_score(score) {
                     return score.toLocaleString('en-US', { useGrouping: true });
                 };
-                self.update_global_score = function(score) {
-                    global_score.innerHTML = self.format_score(score);
+                function update_global_score(score) {
+                    global_score.innerHTML = format_score(score);
                 };
-                self.step_global_score = function() {
-                    self.update_global_score(parseInt(global_score.innerHTML.replace(",", "")) + 1);
+                function step_global_score() {
+                    update_global_score(parseInt(global_score.innerHTML.replaceAll(",", "")) + 1);
                 };
-                self.update_leaderboard = function(top) {
+                function step_leaderboard_yourself() {
+                    if (leaderboard_yourself) {
+                        leaderboard_yourself.innerHTML = format_score(parseInt(leaderboard_yourself.innerHTML.replace(",", "")) + 1);
+                    }
+                };
+                function update_leaderboard(top) {
+                    last_top = top;
                     leaderboard.innerHTML = "";
+                    leaderboard_yourself = null;
                     top.forEach(function (ele, idx) {
                         var no = document.createElement("span");
                         no.classList.add("no");
@@ -401,18 +419,36 @@
                         }
                         var score = document.createElement("span");
                         score.classList.add("score");
-                        score.innerHTML = self.format_score(ele.score);
+                        score.innerHTML = format_score(ele.score);
+                        if (ele.id === online_id) {
+                            leaderboard_yourself = score;
+                            name.innerHTML += "&nbsp;<span class=\"yourself\">↞&nbsp;你在這</span>"
+                        }
                         var li = document.createElement("li");
                         li.append(no, name, score);
                         leaderboard.append(li);
                     });
                 };
+                self.global = function (retry) {
+                    var gws = new WebSocket(server + "/global");
+                    gws.onmessage = function (evt) {
+                        var json = JSON.parse(evt.data);
+                        update_global_score(json.score);
+                    };
+                    gws.onclose = function () {
+                        retry = (retry || -1) + 1;
+                        if (retry > 8) retry = 8;
+                        setTimeout(function () {
+                            self.global(retry);
+                        }, Math.pow(2, retry));
+                    }
+                };
                 self.leaderboard = function (retry) {
                     var lws = new WebSocket(server + "/top/100");
                     lws.onmessage = function (evt) {
                         var json = JSON.parse(evt.data);
-                        self.update_global_score(json.global.score);
-                        self.update_leaderboard(json.top);
+                        //update_global_score(json.global.score);
+                        update_leaderboard(json.top);
                     };
                     lws.onclose = function () {
                         retry = (retry || -1) + 1;
@@ -443,11 +479,13 @@
             }
 
             storage.load();
+            setTimeout(online.global, 666);
             online.leaderboard();
 
+            var socres = document.querySelector("#scores");
             var scores_toggle = document.querySelector("#scores_toggle");
             var scores_leaderboard = document.querySelector("#scores_leaderboard");
-            scores_toggle.addEventListener('click', function(e) {
+            scores.addEventListener('click', function(e) {
                 if (scores_toggle.classList.contains("show")) {
                     scores_toggle.classList.remove("show");
                     scores_leaderboard.classList.remove("show");
@@ -455,6 +493,12 @@
                     scores_toggle.classList.add("show");
                     scores_leaderboard.classList.add("show");
                 }
+            });
+
+            var socres_signin = document.querySelector("#scores_signin");
+            var socres_signedin = document.querySelector("#scores_signedin");
+            socres_signin.addEventListener('click', function(e) {
+                e.stopPropagation();
             });
 
             if (isMobile()) {
