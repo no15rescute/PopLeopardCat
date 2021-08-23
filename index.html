@@ -3,6 +3,7 @@
     <head>
         <title>Pop Leopard Cat</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, maximum-scale=1, minimum-scale=1">
+        <meta charset="utf-8">
         <!-- Primary Meta Tags -->
         <meta name="title" content="Pop Leopard Cat">
         <meta name="description" content="Click No.15">
@@ -37,16 +38,18 @@
                 background-repeat: no-repeat;
                 background-size: cover;
             }
-            img {
-                position: absolute;
-                height: 100vh;
-            }
-            div {
+            #no15_container,
+            #scores_container_wrap {
                 width: 100vw;
                 height: 100vh;
                 display: flex;
                 justify-content: center;
                 overflow: hidden;
+            }
+            #no15_container img {
+                position: absolute;
+                height: 100vh;
+                height: calc(100vh - 2.5rem);
             }
             #counter {
                 line-height: 2em;
@@ -56,6 +59,129 @@
                 color: transparent;
                 text-shadow: 0px 0px 15px #da5b11c0
             }
+            #scores_container {
+                position: absolute;
+                bottom: 0;
+                z-index: 200;
+                background-color: #fff0c3;
+                margin: 0 auto;
+                width: 100%;
+                max-width: 50rem;
+                border: 0.1rem #fee9ad solid;
+                border-radius: 1rem 1rem 0 0;
+            }
+            #scores_icon {
+                border-right: 0.1rem #fee9ad solid;
+                padding: 0 0.75rem 0 0.25rem;
+            }
+            #scores {
+                display: flex;
+                flex-direction: row;
+                vertical-align: middle;
+                padding: 0.75rem;
+            }
+            #scores_center {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+                position: relative;
+            }
+            #global_scores {
+                text-align: center;
+                color: #a22105;
+            }
+            #global_scores_text {
+                display: contents;
+            }
+            #scores_signin_wrap {
+                position: absolute;
+                right: 0.5rem;
+                padding-right: 0.5rem;
+            }
+            #scores_signin_wrap:hover {
+                background: rgba(0, 0, 0, 0.2);
+                border-radius: 0.25rem;
+            }
+            #scores_signin_icon {
+                background: url(youtube_social_icon_red.png);
+                background-repeat: no-repeat;
+                background-size: contain;
+                width: 1.5rem;
+                height: 1rem;
+                display: inline-block;
+                vertical-align: middle;
+            }
+            #scores_signin,
+            #scores_signedin {
+                background: transparent;
+                border: none;
+            }
+            #scores_signin,
+            #scores_signin.signedin,
+            #scores_signedin {
+                display: none;
+            }
+            #scores_signin.loaded,
+            #scores_signedin.signedin {
+                display: block;
+            }
+            #scores_toggle_wrap {
+                display: flex;
+                flex-direction: column;
+                border-left: 0.1rem #fee9ad solid;
+            }
+            #scores_toggle {
+                background: transparent;
+                border: none;
+                padding: 0 0.25rem 0 0.75rem;
+            }
+            #scores_toggle svg {
+                transition: transform 0.5s ease-in-out;
+                width: 1rem;
+            }
+            #scores_toggle.show svg {
+                transform: rotate(-180deg);
+            }
+            #scores_leaderboard {
+                display: flex;
+                flex-direction: row;
+                max-height: 0;
+                transition: max-height 0.5s;
+            }
+            #scores_leaderboard.show {
+                max-height: 70vh;
+            }
+            #scores_leaderboard div.wrap {
+                overflow-y: scroll;
+                margin-top: 1rem;
+                width: 100%;
+            }
+            #scores_leaderboard ol {
+                padding: 0 0.5rem;
+                list-style: none;
+                max-width: 50rem;
+                margin: 0 auto;
+            }
+            #scores_leaderboard li {
+                padding: 0.5rem 0;
+                display: flex;
+                flex-direction: row;
+                border-bottom: 0.1rem #fee9ad solid ;
+                align-items: center;
+            }
+            #scores_leaderboard li .no {
+                min-width: 1.5rem;
+                text-align: center;
+                margin-right: 0.5rem;
+            }
+            #scores_leaderboard li .name {
+            }
+            #scores_leaderboard li .name .yourself {
+                font-size: 0.75rem;
+            }
+            #scores_leaderboard li .score {
+                margin-left: auto;
+            }
         </style>
     </head>
     <body>
@@ -63,6 +189,38 @@
             <img id="no15" src="./normal.png"/>
             <img id="no15_pop" src="./pop.png" style="visibility: hidden;"/>
             <div id="counter"></div>
+        </div>
+        <div id="scores_container_wrap">
+            <div id="scores_container">
+                <div id="scores">
+                    <div id="scores_icon">🏆</div>
+                    <div id="scores_center">
+                        <div id="global_scores">
+                            總點擊 <span id="global_scores_text"><span style="font-size:.75rem;">讀取中...</span></span>
+                        </div>
+                        <div id="scores_signin_wrap">
+                            <button id="scores_signin">
+                                <div id="scores_signin_icon"></div>
+                                登入
+                            </button>
+                            <button id="scores_signedin">
+                                <div id="scores_signin_icon"></div>
+                                登出
+                            </button>
+                        </div>
+                    </div>
+                    <div id="scores_toggle_wrap">
+                        <button id="scores_toggle">
+                            <svg data-v-0a2cb64d="" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16"><path data-v-0a2cb64d="" fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="scores_leaderboard">
+                    <div class="wrap">
+                        <ol></ol>
+                    </div>
+                </div>
+            </div>
         </div>
     </body>
     <script>
@@ -77,33 +235,288 @@
 
             function pop() {
                 playSound();
-                no15.setAttribute("style","visibility: hidden;");
-                no15_pop.setAttribute("style","visibility: unset;");
+                no15.setAttribute("style", "visibility: hidden;");
+                no15_pop.setAttribute("style", "visibility: unset;");
             }
 
             function unpop() {
-                no15_pop.setAttribute("style","visibility: hidden;");
-                no15.setAttribute("style","visibility: unset;");
+                no15_pop.setAttribute("style", "visibility: hidden;");
+                no15.setAttribute("style", "visibility: unset;");
             }
 
             var storage = {};
-            storage.load = function () {
+            storage.load = function() {
                 var count = localStorage.getItem("pop_count");
                 if (count !== null) {
                     pop_count = parseInt(count);
                     counter.innerHTML = pop_count;
                 }
             };
-            storage.save = function () {
+            storage.save = function() {
                 localStorage.setItem("pop_count", pop_count);
             }
+            storage.id = function() {
+                return localStorage.getItem("online_id");
+            };
+            storage.set_id = function(id) {
+                localStorage.setItem("online_id", id);
+            };
+
+            var online = (function() {
+                var server = "s://scores.popleopardcat.saru.moe";
+                //var server = "s://scores-popleopardcat.test-endpoint.lan";
+                var scope = "/no15"
+                var self = {
+                    score: 0 // real online score
+                };
+                var ws = null;
+                var online_id = storage.id();
+                var start = Date.now();
+                var next = start;
+                var no = 0;
+                var waiting = true;
+                var score = 0;
+                var salt = "";
+                var hash = "";
+                var hashes_start = 0;
+                var hashes = [];
+                var tasks = [];
+                var task_runner = null;
+                var task_last = start;
+
+                var global_score = document.querySelector("#global_scores_text");
+                var leaderboard = document.querySelector("#scores_leaderboard ol");
+                var leaderboard_yourself = null;
+
+                var yt_id = null;
+
+                var gen_hashes = function(target_no, sec) {
+                    var idx = target_no - hashes_start;
+                    if (idx < 0) {
+                        return [];
+                    } else {
+                        return hashes[idx] = window.hash(hash, salt, score, sec, ws);
+                    }
+                };
+                self.connect = function(cb) {
+                    ws = new WebSocket("ws" + server + scope + "/submit");
+                    ws.onmessage = function(evt) {
+                        var args = evt.data.split(",");
+                        var cmd = args.shift();
+                        switch (cmd) {
+                            case "init":
+                                online_id = args[0]
+                                storage.set_id(online_id);
+                                self.score = score = parseInt(args[1]);
+                                hash = args[2];
+                                salt = args[3];
+                                start = Date.now();
+                                hashes_start = 0;
+                                hashes = [];
+                                tasks = [];
+                                setup_task_runner();
+                                waiting = false;
+                                if (cb) cb();
+                                break;
+                            case "ack":
+                                var sync_no = parseInt(args[0]);
+                                var idx = sync_no - hashes_start;
+                                hash = hashes[idx][parseInt(args[1])];
+                                score = parseInt(args[2]);
+                                self.score = parseInt(args[3]);
+                                if (args[4]) salt = args[4];
+                                hashes_start = sync_no + 1;
+                                hashes = hashes.slice(sync_no + 1);
+                                break;
+                            case "sync":
+                                hash = args[0];
+                                hashes = [];
+                                hashes_start = no + 1;
+                                tasks = [];
+                                self.score = score = parseInt(args[1]);
+                                if (args[2]) salt = args[2];
+                                self.count_up();
+                                break;
+                        }
+                    };
+                    ws.onopen = function() {
+                        connected = true;
+                        if (online_id) ws.send("contiune," + online_id);
+                        else ws.send("new");
+                    };
+                    ws.onclose = function() {
+                        ws = null;
+                        waiting = true;
+                    }
+                };
+
+                function setup_task_runner() {
+                    if (task_runner) return;
+                    task_runner = setInterval(function() {
+                        var now = Date.now();
+                        if (tasks.length === 0) {
+                            if (!ws) {
+                                clearInterval(task_runner);
+                                task_runner = null;
+                            }
+                        } else if ((now - task_last) >= 3) {
+                            task_last = now;
+                            var task = tasks.shift();
+                            task();
+                        }
+                    }, 3);
+                };
+                self.count_up = function() {
+                    if (!window.hash) return;
+                    if (!ws) self.connect(self.count_up);
+                    else if (!waiting) {
+                        no += 1;
+                        var local_no = no;
+                        tasks.push(function() {
+                            if (ws) {
+                                var sec = Math.floor((Date.now() - start) / 1000);
+                                hs = gen_hashes(local_no, sec);
+                                ws.send("count," + local_no + "," + hs.join(","));
+                                hash = hs[2];
+                                score += 1;
+                                self.score += 1;
+
+                                step_global_score();
+                                step_leaderboard_yourself();
+                            }
+                        });
+                    }
+                };
+
+                function format_score(score) {
+                    return score.toLocaleString('en-US', {
+                        useGrouping: true
+                    });
+                };
+
+                function update_global_score(score) {
+                    global_score.innerHTML = format_score(score);
+                };
+
+                function step_global_score() {
+                    update_global_score(parseInt(global_score.innerHTML.replaceAll(",", "")) + 1);
+                };
+
+                function step_leaderboard_yourself() {
+                    if (leaderboard_yourself) {
+                        leaderboard_yourself.innerHTML = format_score(parseInt(leaderboard_yourself.innerHTML.replace(",", "")) + 1);
+                    }
+                };
+
+                function update_leaderboard(top) {
+                    last_top = top;
+                    leaderboard.innerHTML = "";
+                    leaderboard_yourself = null;
+                    var leaderboard_yourself_tmp_id, leaderboard_yourself_tmp_yt;
+                    top.forEach(function(ele, idx) {
+                        var no = document.createElement("span");
+                        no.classList.add("no");
+                        switch (idx + 1) {
+                            case 1:
+                                no.innerHTML = "🥇";
+                                break;
+                            case 2:
+                                no.innerHTML = "🥈";
+                                break;
+                            case 3:
+                                no.innerHTML = "🥉";
+                                break;
+                            default:
+                                no.innerHTML = idx + 1;
+                                break;
+                        }
+                        var name = document.createElement("span");
+                        name.classList.add("name");
+                        if (ele.yt_name) {
+                            name.innerHTML = ele.yt_name;
+                        } else {
+                            name.innerHTML = "這是個低調的路人";
+                        }
+                        var score = document.createElement("span");
+                        score.classList.add("score");
+                        score.innerHTML = format_score(ele.score);
+                        if (ele.yt_id === yt_id) {
+                            leaderboard_yourself_tmp_yt = {
+                                "score": score,
+                                "name": name
+                            };
+                        }
+                        if (ele.id === online_id) {
+                            leaderboard_yourself_tmp_id = {
+                                "score": score,
+                                "name": name
+                            };
+                        }
+                        var li = document.createElement("li");
+                        li.append(no, name, score);
+                        leaderboard.append(li);
+                    });
+                    var leaderboard_yourself_tmp = leaderboard_yourself_tmp_yt || leaderboard_yourself_tmp_id;
+                    if (leaderboard_yourself_tmp) {
+                        leaderboard_yourself = leaderboard_yourself_tmp.score;
+                        leaderboard_yourself_tmp.name.innerHTML += "&nbsp;<span class=\"yourself\">↞&nbsp;你在這</span>"
+                    }
+                };
+                self.global = function(retry) {
+                    var gws = new WebSocket("ws" + server + scope + "/global");
+                    gws.onmessage = function(evt) {
+                        var json = JSON.parse(evt.data);
+                        update_global_score(json.score);
+                    };
+                    gws.onclose = function() {
+                        retry = (retry || -1) + 1;
+                        if (retry > 8) retry = 8;
+                        setTimeout(function() {
+                            self.global(retry);
+                        }, Math.pow(2, retry));
+                    }
+                };
+                self.leaderboard = function(retry) {
+                    var lws = new WebSocket("ws" + server + scope + "/top/100");
+                    lws.onmessage = function(evt) {
+                        var json = JSON.parse(evt.data);
+                        //update_global_score(json.global.score);
+                        update_leaderboard(json.top);
+                    };
+                    lws.onclose = function() {
+                        retry = (retry || -1) + 1;
+                        if (retry > 8) retry = 8;
+                        setTimeout(function() {
+                            self.leaderboard(retry);
+                        }, Math.pow(2, retry));
+                    }
+                };
+
+                self.update_yt = function(user) {
+                    if (user.isSignedIn()) {
+                        var xhr = new XMLHttpRequest();
+                        xhr.onload = function() {
+                            var json = JSON.parse(xhr.responseText);
+                            yt_id = json.id;
+                        }
+                        xhr.open("POST", "http" + server + "/link/" + online_id + "/yt");
+                        xhr.send(user.getAuthResponse().access_token);
+                    }
+                };
+
+                return self;
+            })();
 
             function isMobile() {
-                try{ document.createEvent("TouchEvent"); return true; }
-                catch(e){ return false;}
+                try {
+                    document.createEvent("TouchEvent");
+                    return true;
+                } catch (e) {
+                    return false;
+                }
             }
 
-            function playSound(){
+            function playSound() {
                 sound_effect.currentTime = 0;
                 sound_effect.play();
             }
@@ -112,55 +525,119 @@
                 pop_count++;
                 counter.innerHTML = pop_count;
                 storage.save();
+                online.count_up();
             }
 
             storage.load();
+            setTimeout(online.global, 666);
+            online.leaderboard();
+            window.update_yt = online.update_yt;
+            if (GoogleAuth) updateSigninStatus();
+
+            var socres = document.querySelector("#scores");
+            var scores_toggle = document.querySelector("#scores_toggle");
+            var scores_leaderboard = document.querySelector("#scores_leaderboard");
+            scores.addEventListener('click', function(e) {
+                if (scores_toggle.classList.contains("show")) {
+                    scores_toggle.classList.remove("show");
+                    scores_leaderboard.classList.remove("show");
+                } else {
+                    scores_toggle.classList.add("show");
+                    scores_leaderboard.classList.add("show");
+                }
+            });
 
             if (isMobile()) {
-                window.addEventListener("touchmove",function(e) {
+                window.addEventListener("touchmove", function(e) {
                     e.preventDefault();
-                }, { passive: false });
-                no15.setAttribute("src","./up.png");
-                no15_container.addEventListener('touchstart', function (e) {
+                }, {
+                    passive: false
+                });
+                no15.setAttribute("src", "./up.png");
+                no15_container.addEventListener('touchstart', function(e) {
                     count_up();
                     pop();
                 });
-                no15_container.addEventListener('touchend', function (e) {
+                no15_container.addEventListener('touchend', function(e) {
                     unpop();
                 });
             } else {
-                no15_container.addEventListener('mouseover', function (e) {
-                    no15.setAttribute("src","./up.png");
+                no15_container.addEventListener('mouseover', function(e) {
+                    no15.setAttribute("src", "./up.png");
                 });
-                no15_container.addEventListener('mouseout', function (e) {
-                    no15.setAttribute("src","./normal.png");
+                no15_container.addEventListener('mouseout', function(e) {
+                    no15.setAttribute("src", "./normal.png");
                 });
 
                 //  點擊事件
-                no15_container.addEventListener('mousedown', function (e) {
+                no15_container.addEventListener('mousedown', function(e) {
                     count_up();
                     pop();
                 });
-                no15_container.addEventListener('mouseup', function (e) {
+                no15_container.addEventListener('mouseup', function(e) {
                     unpop();
                 });
 
                 //  鍵盤事件
-                document.addEventListener('keydown', function (e) {
+                document.addEventListener('keydown', function(e) {
                     pop();
                 });
-                document.addEventListener('keyup', function (e) {
+                document.addEventListener('keyup', function(e) {
                     count_up();
-                    no15.setAttribute("src","./up.png");
+                    no15.setAttribute("src", "./up.png");
                     unpop();
                 });
             }
         }
+
+        var GoogleAuth;
+        var socres_signin = document.querySelector("#scores_signin");
+        var socres_signedin = document.querySelector("#scores_signedin");
+        socres_signin.addEventListener('click', function(e) {
+            if (GoogleAuth) GoogleAuth.signIn();
+            e.stopPropagation();
+        });
+        socres_signedin.addEventListener('click', function(e) {
+            if (GoogleAuth) GoogleAuth.signOut();
+            e.stopPropagation();
+        });
+        window.handleClientLoad = function() {
+            gapi.load('client:auth2', initClient);
+        }
+
+        function initClient() {
+            gapi.client.init({
+                'clientId': '46360894940-9sp8ubejnha6biluq3sdlnsc8ppmj6oj.apps.googleusercontent.com',
+                'scope': 'https://www.googleapis.com/auth/youtube.readonly',
+                'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest']
+            }).then(function() {
+                GoogleAuth = gapi.auth2.getAuthInstance();
+                GoogleAuth.isSignedIn.listen(updateSigninStatus);
+                updateSigninStatus();
+            });
+        }
+
+        function updateSigninStatus() {
+            var user = GoogleAuth.currentUser.get();
+            if (user.isSignedIn()) {
+                socres_signin.classList.remove("loaded");
+                socres_signin.classList.add("signedin");
+                socres_signedin.classList.add("signedin");
+            } else {
+                socres_signin.classList.add("loaded");
+                socres_signedin.classList.remove("signedin");
+            }
+            update_yt(user);
+        }
     </script>
+    <script src="hash.js" async></script>
     <script type="module">
         import 'https://cdn.jsdelivr.net/npm/@pwabuilder/pwaupdate';
-    
         const el = document.createElement('pwa-update');
         document.body.appendChild(el);
+    </script>
+    <script async defer src="https://apis.google.com/js/api.js"
+        onload="this.onload=function(){};handleClientLoad()"
+        onreadystatechange="if (this.readyState === 'complete') this.onload()">
     </script>
 </html>
