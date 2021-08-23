@@ -235,36 +235,36 @@
 
             function pop() {
                 playSound();
-                no15.setAttribute("style","visibility: hidden;");
-                no15_pop.setAttribute("style","visibility: unset;");
+                no15.setAttribute("style", "visibility: hidden;");
+                no15_pop.setAttribute("style", "visibility: unset;");
             }
 
             function unpop() {
-                no15_pop.setAttribute("style","visibility: hidden;");
-                no15.setAttribute("style","visibility: unset;");
+                no15_pop.setAttribute("style", "visibility: hidden;");
+                no15.setAttribute("style", "visibility: unset;");
             }
 
             var storage = {};
-            storage.load = function () {
+            storage.load = function() {
                 var count = localStorage.getItem("pop_count");
                 if (count !== null) {
                     pop_count = parseInt(count);
                     counter.innerHTML = pop_count;
                 }
             };
-            storage.save = function () {
+            storage.save = function() {
                 localStorage.setItem("pop_count", pop_count);
             }
-            storage.id = function () {
+            storage.id = function() {
                 return localStorage.getItem("online_id");
             };
-            storage.set_id = function (id) {
+            storage.set_id = function(id) {
                 localStorage.setItem("online_id", id);
             };
 
-            var online = (function () {
+            var online = (function() {
                 var server = "s://scores.popleopardcat.saru.moe";
-                //var server = "://scores-popleopardcat.test-endpoint.lan:3000";
+                //var server = "s://scores-popleopardcat.test-endpoint.lan";
                 var scope = "/no15"
                 var self = {
                     score: 0 // real online score
@@ -290,7 +290,7 @@
 
                 var yt_id = null;
 
-                var gen_hashes = function (target_no, sec) {
+                var gen_hashes = function(target_no, sec) {
                     var idx = target_no - hashes_start;
                     if (idx < 0) {
                         return [];
@@ -298,9 +298,9 @@
                         return hashes[idx] = window.hash(hash, salt, score, sec, ws);
                     }
                 };
-                self.connect = function (cb) {
+                self.connect = function(cb) {
                     ws = new WebSocket("ws" + server + scope + "/submit");
-                    ws.onmessage = function (evt) {
+                    ws.onmessage = function(evt) {
                         var args = evt.data.split(",");
                         var cmd = args.shift();
                         switch (cmd) {
@@ -339,19 +339,20 @@
                                 break;
                         }
                     };
-                    ws.onopen = function () {
+                    ws.onopen = function() {
                         connected = true;
                         if (online_id) ws.send("contiune," + online_id);
                         else ws.send("new");
                     };
-                    ws.onclose = function () {
+                    ws.onclose = function() {
                         ws = null;
                         waiting = true;
                     }
                 };
+
                 function setup_task_runner() {
                     if (task_runner) return;
-                    task_runner = setInterval(function () {
+                    task_runner = setInterval(function() {
                         var now = Date.now();
                         if (tasks.length === 0) {
                             if (!ws) {
@@ -365,13 +366,13 @@
                         }
                     }, 3);
                 };
-                self.count_up = function () {
+                self.count_up = function() {
                     if (!window.hash) return;
                     if (!ws) self.connect(self.count_up);
                     else if (!waiting) {
                         no += 1;
                         var local_no = no;
-                        tasks.push(function () {
+                        tasks.push(function() {
                             if (ws) {
                                 var sec = Math.floor((Date.now() - start) / 1000);
                                 hs = gen_hashes(local_no, sec);
@@ -388,25 +389,31 @@
                 };
 
                 function format_score(score) {
-                    return score.toLocaleString('en-US', { useGrouping: true });
+                    return score.toLocaleString('en-US', {
+                        useGrouping: true
+                    });
                 };
+
                 function update_global_score(score) {
                     global_score.innerHTML = format_score(score);
                 };
+
                 function step_global_score() {
                     update_global_score(parseInt(global_score.innerHTML.replaceAll(",", "")) + 1);
                 };
+
                 function step_leaderboard_yourself() {
                     if (leaderboard_yourself) {
                         leaderboard_yourself.innerHTML = format_score(parseInt(leaderboard_yourself.innerHTML.replace(",", "")) + 1);
                     }
                 };
+
                 function update_leaderboard(top) {
                     last_top = top;
                     leaderboard.innerHTML = "";
                     leaderboard_yourself = null;
                     var leaderboard_yourself_tmp_id, leaderboard_yourself_tmp_yt;
-                    top.forEach(function (ele, idx) {
+                    top.forEach(function(ele, idx) {
                         var no = document.createElement("span");
                         no.classList.add("no");
                         switch (idx + 1) {
@@ -435,14 +442,14 @@
                         score.innerHTML = format_score(ele.score);
                         if (ele.yt_id === yt_id) {
                             leaderboard_yourself_tmp_yt = {
-                                "score" : score,
-                                "name" : name
+                                "score": score,
+                                "name": name
                             };
                         }
                         if (ele.id === online_id) {
                             leaderboard_yourself_tmp_id = {
-                                "score" : score,
-                                "name" : name
+                                "score": score,
+                                "name": name
                             };
                         }
                         var li = document.createElement("li");
@@ -455,37 +462,37 @@
                         leaderboard_yourself_tmp.name.innerHTML += "&nbsp;<span class=\"yourself\">↞&nbsp;你在這</span>"
                     }
                 };
-                self.global = function (retry) {
+                self.global = function(retry) {
                     var gws = new WebSocket("ws" + server + scope + "/global");
-                    gws.onmessage = function (evt) {
+                    gws.onmessage = function(evt) {
                         var json = JSON.parse(evt.data);
                         update_global_score(json.score);
                     };
-                    gws.onclose = function () {
+                    gws.onclose = function() {
                         retry = (retry || -1) + 1;
                         if (retry > 8) retry = 8;
-                        setTimeout(function () {
+                        setTimeout(function() {
                             self.global(retry);
                         }, Math.pow(2, retry));
                     }
                 };
-                self.leaderboard = function (retry) {
+                self.leaderboard = function(retry) {
                     var lws = new WebSocket("ws" + server + scope + "/top/100");
-                    lws.onmessage = function (evt) {
+                    lws.onmessage = function(evt) {
                         var json = JSON.parse(evt.data);
                         //update_global_score(json.global.score);
                         update_leaderboard(json.top);
                     };
-                    lws.onclose = function () {
+                    lws.onclose = function() {
                         retry = (retry || -1) + 1;
                         if (retry > 8) retry = 8;
-                        setTimeout(function () {
+                        setTimeout(function() {
                             self.leaderboard(retry);
                         }, Math.pow(2, retry));
                     }
                 };
 
-                self.update_yt = function (user) {
+                self.update_yt = function(user) {
                     if (user.isSignedIn()) {
                         var xhr = new XMLHttpRequest();
                         xhr.onload = function() {
@@ -501,11 +508,15 @@
             })();
 
             function isMobile() {
-                try{ document.createEvent("TouchEvent"); return true; }
-                catch(e){ return false;}
+                try {
+                    document.createEvent("TouchEvent");
+                    return true;
+                } catch (e) {
+                    return false;
+                }
             }
 
-            function playSound(){
+            function playSound() {
                 sound_effect.currentTime = 0;
                 sound_effect.play();
             }
@@ -526,7 +537,7 @@
             var socres = document.querySelector("#scores");
             var scores_toggle = document.querySelector("#scores_toggle");
             var scores_leaderboard = document.querySelector("#scores_leaderboard");
-            scores.addEventListener('click', function (e) {
+            scores.addEventListener('click', function(e) {
                 if (scores_toggle.classList.contains("show")) {
                     scores_toggle.classList.remove("show");
                     scores_leaderboard.classList.remove("show");
@@ -537,41 +548,43 @@
             });
 
             if (isMobile()) {
-                window.addEventListener("touchmove",function (e) {
+                window.addEventListener("touchmove", function(e) {
                     e.preventDefault();
-                }, { passive: false });
-                no15.setAttribute("src","./up.png");
-                no15_container.addEventListener('touchstart', function (e) {
+                }, {
+                    passive: false
+                });
+                no15.setAttribute("src", "./up.png");
+                no15_container.addEventListener('touchstart', function(e) {
                     count_up();
                     pop();
                 });
-                no15_container.addEventListener('touchend', function (e) {
+                no15_container.addEventListener('touchend', function(e) {
                     unpop();
                 });
             } else {
-                no15_container.addEventListener('mouseover', function (e) {
-                    no15.setAttribute("src","./up.png");
+                no15_container.addEventListener('mouseover', function(e) {
+                    no15.setAttribute("src", "./up.png");
                 });
-                no15_container.addEventListener('mouseout', function (e) {
-                    no15.setAttribute("src","./normal.png");
+                no15_container.addEventListener('mouseout', function(e) {
+                    no15.setAttribute("src", "./normal.png");
                 });
 
                 //  點擊事件
-                no15_container.addEventListener('mousedown', function (e) {
+                no15_container.addEventListener('mousedown', function(e) {
                     count_up();
                     pop();
                 });
-                no15_container.addEventListener('mouseup', function (e) {
+                no15_container.addEventListener('mouseup', function(e) {
                     unpop();
                 });
 
                 //  鍵盤事件
-                document.addEventListener('keydown', function (e) {
+                document.addEventListener('keydown', function(e) {
                     pop();
                 });
-                document.addEventListener('keyup', function (e) {
+                document.addEventListener('keyup', function(e) {
                     count_up();
-                    no15.setAttribute("src","./up.png");
+                    no15.setAttribute("src", "./up.png");
                     unpop();
                 });
             }
@@ -580,28 +593,30 @@
         var GoogleAuth;
         var socres_signin = document.querySelector("#scores_signin");
         var socres_signedin = document.querySelector("#scores_signedin");
-        socres_signin.addEventListener('click', function (e) {
+        socres_signin.addEventListener('click', function(e) {
             if (GoogleAuth) GoogleAuth.signIn();
             e.stopPropagation();
         });
-        socres_signedin.addEventListener('click', function (e) {
+        socres_signedin.addEventListener('click', function(e) {
             if (GoogleAuth) GoogleAuth.signOut();
             e.stopPropagation();
         });
-        window.handleClientLoad = function () {
+        window.handleClientLoad = function() {
             gapi.load('client:auth2', initClient);
         }
+
         function initClient() {
             gapi.client.init({
                 'clientId': '46360894940-9sp8ubejnha6biluq3sdlnsc8ppmj6oj.apps.googleusercontent.com',
                 'scope': 'https://www.googleapis.com/auth/youtube.readonly',
                 'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest']
-            }).then(function () {
+            }).then(function() {
                 GoogleAuth = gapi.auth2.getAuthInstance();
                 GoogleAuth.isSignedIn.listen(updateSigninStatus);
                 updateSigninStatus();
             });
         }
+
         function updateSigninStatus() {
             var user = GoogleAuth.currentUser.get();
             if (user.isSignedIn()) {
@@ -618,7 +633,6 @@
     <script src="hash.js" async></script>
     <script type="module">
         import 'https://cdn.jsdelivr.net/npm/@pwabuilder/pwaupdate';
-    
         const el = document.createElement('pwa-update');
         document.body.appendChild(el);
     </script>
