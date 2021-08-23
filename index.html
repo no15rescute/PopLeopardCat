@@ -263,8 +263,9 @@
             };
 
             var online = (function () {
-                //var server = "s://scores.popleopardcat.saru.moe";
-                var server = "://scores-popleopardcat.test-endpoint.lan:3000";
+                var server = "s://scores.popleopardcat.saru.moe";
+                //var server = "://scores-popleopardcat.test-endpoint.lan:3000";
+                var scope = "/no15"
                 var self = {
                     score: 0 // real online score
                 };
@@ -298,7 +299,7 @@
                     }
                 };
                 self.connect = function (cb) {
-                    ws = new WebSocket("ws" + server + "/submit");
+                    ws = new WebSocket("ws" + server + scope + "/submit");
                     ws.onmessage = function (evt) {
                         var args = evt.data.split(",");
                         var cmd = args.shift();
@@ -455,7 +456,7 @@
                     }
                 };
                 self.global = function (retry) {
-                    var gws = new WebSocket("ws" + server + "/global");
+                    var gws = new WebSocket("ws" + server + scope + "/global");
                     gws.onmessage = function (evt) {
                         var json = JSON.parse(evt.data);
                         update_global_score(json.score);
@@ -469,7 +470,7 @@
                     }
                 };
                 self.leaderboard = function (retry) {
-                    var lws = new WebSocket("ws" + server + "/top/100");
+                    var lws = new WebSocket("ws" + server + scope + "/top/100");
                     lws.onmessage = function (evt) {
                         var json = JSON.parse(evt.data);
                         //update_global_score(json.global.score);
@@ -490,7 +491,6 @@
                         xhr.onload = function() {
                             var json = JSON.parse(xhr.responseText);
                             yt_id = json.id;
-console.log(yt_id);
                         }
                         xhr.open("POST", "http" + server + "/link/" + online_id + "/yt");
                         xhr.send(user.getAuthResponse().access_token);
